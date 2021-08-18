@@ -1,0 +1,74 @@
+---
+title: "Untitled"
+author: "Ryan Munnikhuis"
+date: "8/18/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#General use
+library(tidyverse)
+library(here)
+library(janitor)
+
+# Specifically for dataviz: 
+library(patchwork)
+library(ggrepel)
+library(gghighlight)
+library(ggExtra)
+library(paletteer)
+library(ggbeeswarm)
+library(gapminder)
+library(sf)
+```
+
+```{r}
+launch_data = read_csv(here::here("data", "space_launches.csv"))
+san_fran = read_csv(here::here("data", "San_Francisco_Communitywide_Greenhouse_Gas_Inventory.csv"))
+
+```
+```{r}
+
+hooray = ggplot(san_fran, aes(x = Emissions_mtCO2e, y = Quantity)) + 
+  geom_point() + geom_line() + geom_boxplot() + theme(
+           panel.background = element_rect(fill = "red", 
+                                           color = "purple", 
+                                           size = 50),
+           panel.grid.major.x = element_line(color = "orange", size = 11), 
+           panel.grid.major.y = element_line(color = "black", size = 15), 
+           plot.background = element_rect(fill = "black", size = 4),
+           axis.text.x = element_text(color = "yellow"), 
+           axis.text.y = element_text(color = "blue"), 
+           axis.title = element_text(color = "orange", size = 80)
+         ) + labs(title = "SPACE", x = "SPACESPACESPACEAPSCE", y = "SPACESPACESPACESPACESPACE")
+           
+ggsave(here::here("R", "Hooray!.png"))
+
+```
+
+```{r}
+
+
+SF_summary = san_fran %>% 
+  clean_names() %>%
+  group_by(sector_general) %>%
+  summarize(emission_count = (emissions_mt_co2e = n()))
+
+SF_summary_2 = san_fran %>% 
+  clean_names() %>% 
+  group_by(calendar_year, commodity_type) %>% summarize(emission_count = (emissions_mt_co2e = n()))
+
+ex_3 = san_fran %>% 
+  clean_names() %>%
+  filter(calendar_year == 2005:2019) %>%
+  filter(str_detect(sector_detail2, pattern = "PG&E")) %>% 
+  select(calendar_year, sector_detail2, emissions_mt_co2e)
+  
+
+```
+```{r}
+ggplot(data = san_fran, aes(x = Sector_General, y = Emissions_mtCO2e)) + geom_point()
+
+```
+
