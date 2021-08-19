@@ -7,12 +7,10 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-#General use
+
 library(tidyverse)
 library(here)
 library(janitor)
-
-# Specifically for dataviz: 
 library(patchwork)
 library(ggrepel)
 library(gghighlight)
@@ -21,6 +19,7 @@ library(paletteer)
 library(ggbeeswarm)
 library(gapminder)
 library(sf)
+library(directlabels)
 ```
 
 ```{r}
@@ -68,7 +67,16 @@ ex_3 = san_fran %>%
 
 ```
 ```{r}
-ggplot(data = san_fran, aes(x = Sector_General, y = Emissions_mtCO2e)) + geom_point()
+san_fran_plot = san_fran %>% group_by(Calendar_Year, Sector_Detail1, Quantity) %>% filter(str_detect(Quantity_Units, pattern = "kWh")) 
+
+san_fran_plot = san_fran_plot %>% group_by(Calendar_Year, Sector_Detail1) %>% summarize(Quantity_sum = sum(Quantity))
+
+san_fran_plot = san_fran_plot %>% mutate(Quantity_sum = Quantity_sum / (10^6))
+
+ggplot(data = san_fran_plot, aes(x = Calendar_Year, y = Quantity_sum)) + geom_line(aes(color = Sector_Detail1), size = 1.2) + theme_minimal() + scale_color_discrete("Sector") + labs(y = "Gigawatt Hours", x = "Year", title = "Historic Electricty Usage by Sector") + theme(legend.key.size = unit(.5, 'cm'),                   legend.key.height = unit(.5, 'cm'),
+panel.grid.major = element_blank(), 
+panel.grid.minor = element_blank(),
+axis.title.y = element_text(angle = 90, hjust = .5, vjust = .5))
 
 ```
 
